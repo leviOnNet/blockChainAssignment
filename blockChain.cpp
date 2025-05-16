@@ -1,9 +1,10 @@
 #include "blockChain.h"
 #include <iostream>
 #include <iomanip>
-#include <vector>
+#include <fstream>
+#include <sstream>
 #include <algorithm>
-#include <cstring> // for memset
+#include <cstring>
 
 namespace blockChain
 {
@@ -22,7 +23,10 @@ namespace blockChain
         while (block != nullptr)
         {
             for (int i = 0; i < blockSize - 1; ++i)
+            {
                 delete block[i];
+                block[i] = nullptr;
+            }
             float **next = convert(block[blockSize - 1]);
             delete[] block;
             block = next;
@@ -65,8 +69,14 @@ namespace blockChain
 
     int insert(float **&block, const float value)
     {
-        float **curr = block;
+        if (block == nullptr)
+        {
+            block = createBlock();
+            block[0] = new float(value);
+            return 1;
+        }
 
+        float **curr = block;
         while (curr != nullptr)
         {
             for (int i = 0; i < blockSize - 1; ++i)
@@ -87,10 +97,7 @@ namespace blockChain
             curr = next;
         }
 
-        // Empty chain
-        block = createBlock();
-        block[0] = new float(value);
-        return 1;
+        return 0;
     }
 
     int remove(float **&block, const float value)
@@ -166,17 +173,32 @@ namespace blockChain
     }
 
     void sort(float **block)
-    {
-        int n = numberOfFloats(block);
-        float *arr = toArray(block);
-        std::sort(arr, arr + n);
+{
+    int n = numberOfFloats(block);
+    float *arr = toArray(block);
+    std::sort(arr, arr + n);
 
-        destroy(block);
-        block = createBlock();
-        for (int i = 0; i < n; ++i)
-            insert(block, arr[i]);
-        delete[] arr;
+    // Clear all existing float* elements, but not the block structure
+    float **curr = block;
+    while (curr != nullptr)
+    {
+        for (int i = 0; i < blockSize - 1; ++i)
+        {
+            delete curr[i];
+            curr[i] = nullptr;
+        }
+        curr = convert(curr[blockSize - 1]);
     }
+
+    // Reinsert sorted values
+    for (int i = 0; i < n; ++i)
+    {
+        insert(block, arr[i]);
+    }
+
+    delete[] arr;
+}
+
 
     float total(float **block)
     {
@@ -194,7 +216,7 @@ namespace blockChain
     float average(float **block)
     {
         int n = numberOfFloats(block);
-        return n ? total(block) / n : 0.0f;
+        return n > 0 ? total(block) / n : 0.0f;
     }
 
     void adjust(float **block, float value)
@@ -245,4 +267,23 @@ namespace blockChain
         }
         return block;
     }
-} // namespace blockChain
+
+    // Optional: For debugging
+    void debugPrint(float** block)
+    {
+        int blockNum = 0;
+        while (block != nullptr)
+        {
+            std::cout << "Block " << blockNum++ << ": ";
+            for (int i = 0; i < blockSize - 1; ++i)
+            {
+                if (block[i] != nullptr)
+                    std::cout << *(block[i]) << " ";
+                else
+                    std::cout << "[null] ";
+            }
+            std::cout << "\n";
+            block = convert(block[blockSize - 1]);
+        }
+    }
+}
