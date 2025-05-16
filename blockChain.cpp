@@ -14,18 +14,18 @@ namespace blockChain
     {
         float **block = new float *[blockSize];
         for (int i = 0; i < blockSize; ++i)
-            block[i] = nullptr;
+            block[i] = NULL;
         return block;
     }
 
     void destroy(float **&block)
     {
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
             {
                 delete block[i];
-                block[i] = nullptr;
+                block[i] = NULL;
             }
             float **next = convert(block[blockSize - 1]);
             delete[] block;
@@ -41,7 +41,7 @@ namespace blockChain
     int numberOfBlocks(float **block)
     {
         int count = 0;
-        while (block != nullptr)
+        while (block != NULL)
         {
             count++;
             block = convert(block[blockSize - 1]);
@@ -52,10 +52,10 @@ namespace blockChain
     int numberOfFloats(float **block)
     {
         int count = 0;
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                     count++;
             block = convert(block[blockSize - 1]);
         }
@@ -69,7 +69,7 @@ namespace blockChain
 
     int insert(float **&block, const float value)
     {
-        if (block == nullptr)
+        if (block == NULL)
         {
             block = createBlock();
             block[0] = new float(value);
@@ -77,11 +77,11 @@ namespace blockChain
         }
 
         float **curr = block;
-        while (curr != nullptr)
+        while (curr != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
             {
-                if (curr[i] == nullptr)
+                if (curr[i] == NULL)
                 {
                     curr[i] = new float(value);
                     return 1;
@@ -89,7 +89,7 @@ namespace blockChain
             }
 
             float **next = convert(curr[blockSize - 1]);
-            if (next == nullptr)
+            if (next == NULL)
             {
                 next = createBlock();
                 curr[blockSize - 1] = convert(next);
@@ -105,14 +105,14 @@ namespace blockChain
         int removed = 0;
         float **curr = block;
 
-        while (curr != nullptr)
+        while (curr != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
             {
-                if (curr[i] != nullptr && *(curr[i]) == value)
+                if (curr[i] != NULL && *(curr[i]) == value)
                 {
                     delete curr[i];
-                    curr[i] = nullptr;
+                    curr[i] = NULL;
                     removed++;
                 }
             }
@@ -124,10 +124,10 @@ namespace blockChain
 
     bool search(float **block, const float value)
     {
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
-                if (block[i] != nullptr && *(block[i]) == value)
+                if (block[i] != NULL && *(block[i]) == value)
                     return true;
 
             block = convert(block[blockSize - 1]);
@@ -138,11 +138,11 @@ namespace blockChain
     float *get(float **block, int position)
     {
         int index = 0;
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
             {
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                 {
                     if (index == position)
                         return block[i];
@@ -151,7 +151,7 @@ namespace blockChain
             }
             block = convert(block[blockSize - 1]);
         }
-        return nullptr;
+        return NULL;
     }
 
     float *toArray(float **block)
@@ -160,11 +160,11 @@ namespace blockChain
         float *arr = new float[count];
         int index = 0;
 
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
             {
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                     arr[index++] = *(block[i]);
             }
             block = convert(block[blockSize - 1]);
@@ -180,12 +180,12 @@ namespace blockChain
 
     // Clear all existing float* elements, but not the block structure
     float **curr = block;
-    while (curr != nullptr)
+    while (curr != NULL)
     {
         for (int i = 0; i < blockSize - 1; ++i)
         {
             delete curr[i];
-            curr[i] = nullptr;
+            curr[i] = NULL;
         }
         curr = convert(curr[blockSize - 1]);
     }
@@ -203,10 +203,10 @@ namespace blockChain
     float total(float **block)
     {
         float sum = 0;
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                     sum += *(block[i]);
             block = convert(block[blockSize - 1]);
         }
@@ -221,10 +221,10 @@ namespace blockChain
 
     void adjust(float **block, float value)
     {
-        while (block != nullptr)
+        while (block != NULL)
         {
             for (int i = 0; i < blockSize - 1; ++i)
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                     *(block[i]) += value;
             block = convert(block[blockSize - 1]);
         }
@@ -244,40 +244,38 @@ namespace blockChain
     }
 
     float **loadFromFile(std::string csvFileName)
-    {
-        std::ifstream file(csvFileName);
-        if (!file.is_open())
-            return nullptr;
+{
+    std::ifstream file(csvFileName.c_str());  // C++98 fix
+    if (!file.is_open())
+        return NULL;
 
-        float **block = createBlock();
-        std::string line;
-        while (std::getline(file, line))
+    float **block = createBlock();
+    std::string line;
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+        std::string token;
+        while (std::getline(ss, token, ','))
         {
-            std::stringstream ss(line);
-            std::string token;
-            while (std::getline(ss, token, ','))
-            {
-                try
-                {
-                    float value = std::stof(token);
-                    insert(block, value);
-                }
-                catch (...) {}
-            }
+            std::stringstream valueStream(token);
+            float value;
+            if (valueStream >> value)
+                insert(block, value);
         }
-        return block;
     }
+    return block;
+}
 
     // Optional: For debugging
     void debugPrint(float** block)
     {
         int blockNum = 0;
-        while (block != nullptr)
+        while (block != NULL)
         {
             std::cout << "Block " << blockNum++ << ": ";
             for (int i = 0; i < blockSize - 1; ++i)
             {
-                if (block[i] != nullptr)
+                if (block[i] != NULL)
                     std::cout << *(block[i]) << " ";
                 else
                     std::cout << "[null] ";
