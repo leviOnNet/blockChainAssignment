@@ -1,10 +1,9 @@
 #include "blockChain.h"
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <cstring>
+
 
 namespace blockChain
 {
@@ -172,13 +171,28 @@ namespace blockChain
         return arr;
     }
 
-    void sort(float **block)
+    // Custom insertion sort function
+void sortArray(float *arr, int n)
+{
+    for (int i = 1; i < n; ++i)
+    {
+        float key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key)
+        {
+            arr[j + 1] = arr[j];
+            --j;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+   void sort(float **block)
 {
     int n = numberOfFloats(block);
     float *arr = toArray(block);
-    std::sort(arr, arr + n);
+    sortArray(arr, n);  // use custom sort
 
-    // Clear all existing float* elements, but not the block structure
     float **curr = block;
     while (curr != NULL)
     {
@@ -190,7 +204,6 @@ namespace blockChain
         curr = convert(curr[blockSize - 1]);
     }
 
-    // Reinsert sorted values
     for (int i = 0; i < n; ++i)
     {
         insert(block, arr[i]);
@@ -198,6 +211,7 @@ namespace blockChain
 
     delete[] arr;
 }
+
 
 
     float total(float **block)
